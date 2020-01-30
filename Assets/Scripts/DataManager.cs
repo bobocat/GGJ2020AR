@@ -6,7 +6,8 @@ using SimpleFirebaseUnity;
 public class DataManager : MonoBehaviour
 {
 
-    public Game game;
+    public static DataManager instance;
+    GameManager gameManager;
 
     Firebase firebase = Firebase.CreateNew("https://lal-ggj2020.firebaseio.com");
 
@@ -14,26 +15,23 @@ public class DataManager : MonoBehaviour
 
     FirebaseQueue firebaseQueue;
 
+    private void Awake()
+    {
+        instance = this;
+        firebase.OnGetFailed += GetFailHandler;
+        firebaseQueue = new FirebaseQueue(true, 3, 1f);
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        game = new Game();
-
-        firebase.OnGetFailed += GetFailHandler;
-        firebaseQueue = new FirebaseQueue(true, 3, 1f);
-
+        gameManager = GameManager.instance;
     }
 
     // Update is called once per frame
     void Update()
     {
 
-    }
-
-    public void CreateNewGame()
-    {
-        game.code = Random.Range(1000, 9999).ToString();
-        WriteGameDataToFirebase();
     }
 
     void GetFailHandler(Firebase sender, FirebaseError err)
@@ -45,16 +43,16 @@ public class DataManager : MonoBehaviour
     {
         Dictionary<string, object> fbGame = new Dictionary<string, object>();
 
-        fbGame.Add("code", game.code);
-        fbGame.Add("playerPosition", game.playerPosition);
+//        fbGame.Add("code", game.code);
+        fbGame.Add("playerPosition", gameManager.game.playerPosition);
 
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
-        firebaseQueue.AddQueueUpdate(firebase.Child(game.code, true), json);
+        firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
     }
 
     public void GetPlayerPositionFromFB()
     {
-        firebase.Child(game.code + "playerPosition", true).GetValue();
+        firebase.Child(gameManager.game.code + "/playerPosition", true).GetValue();
 //        game.playerPosition = 
     }
 
@@ -64,38 +62,39 @@ public class DataManager : MonoBehaviour
     }
 
 
-    public void ListenForPlayerPosition()
+    public void StartListening()
     {
-        observer = new FirebaseObserver(firebase.Child(game.code + "/playerPosition"), 1f);
+        observer = new FirebaseObserver(firebase.Child(gameManager.game.code + "/playerPosition"), 1f);
         observer.OnChange += (Firebase sender, DataSnapshot snapshot) =>
         {
             Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
 
-//            int answerCount = 0;   // count how many bets are in
+            float x = System.Convert.ToSingle(dict["x"]);
+            float y = System.Convert.ToSingle(dict["y"]);
+            float z = System.Convert.ToSingle(dict["z"]);
+
+            gameManager.game.playerPosition = new Vector3(x, y, z);
+
+            gameManager.MovePlayer();
+
+            //Debug.Log("playerposx: " + game.playerPosition);
+
 
 /*
-            // set all the teams with bets in to checked mode
-            string answer;
-            for (int i = 0; i < dict.Count; i++)
-            {
-                answer = dict["answer" + (i + 1)].ToString();
-                if (answer != "")
-                {
-                    gameManager.teamList[i].SetTeamStatus(Team.statusType.boxOnlyChecked);
-                    game.team[i].answer = answer;
-                    answerCount++;
-                }
-            }
-
-            // are all the bets in?
-            if (answerCount == dict.Count)
-            {
-                observer.Stop();
-            }
-*/
+                        // are all the bets in?
+                        if (answerCount == dict.Count)
+                        {
+                            observer.Stop();
+                        }
+            */
         };
 
         observer.Start();
+    }
+
+    public void StopListening()
+    {
+        observer.Stop();
     }
 
 }

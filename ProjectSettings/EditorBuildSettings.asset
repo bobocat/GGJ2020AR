@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1045 &1
+EditorBuildSettings:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Scenes:
+  - enabled: 0
+    path: Assets/Oculus/SampleFramework/Usage/Locomotion.unity
+    guid: 024cd9dcd49bd8f46a6bea03aa8a21bb
+  - enabled: 0
+    path: Assets/Scenes/testscene.unity
+    guid: b85e25ba055e8574aa371b04362c4db8
+  - enabled: 0
+    path: Assets/Scenes/SK_test.unity
+    guid: b296b8cb5a0de444e9e3384b73e02966
+  m_configObjects: {}

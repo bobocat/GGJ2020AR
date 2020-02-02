@@ -53,6 +53,8 @@ using UnityEngine;
                 int combo = link.comboBit; // int operators are destructive
                 if((combo & detectedTargets) == link.comboBit){
                     ActivateArtifact(link, link.symbol1.transform);
+
+                    // mainly for first phase of game: can only raise and lower gate levels once
                     if(!link.firstTimeFound){
 /*                        switch(GameManager.instance.game.gameLevel){
                             case 1:
@@ -73,6 +75,11 @@ using UnityEngine;
                         link.firstTimeFound = true;
                         GameManager.instance.UpdateGateLevel(GameManager.instance.player.role);
                         DataManager.instance.WriteGameDataToFirebase();
+                    }
+                    if(link.artifact.name == GameManager.instance.player.artifactToFind){
+                        GameManager.instance.game.foundArtifact = true;
+                        DataManager.instance.WriteGameDataToFirebase();
+                        GameManager.instance.EndGame();
                     }
                 }
                 else{

@@ -45,10 +45,7 @@ public class DataManager : MonoBehaviour
 //        fbGame.Add("code", game.code);
         fbGame.Add("playerPosition", gameManager.game.playerPosition);
         fbGame.Add("gateLevel", gameManager.game.gateLevel);
-        fbGame.Add("artifact1", gameManager.game.artifact1);
-        fbGame.Add("artifact2", gameManager.game.artifact2);
-        fbGame.Add("artifact3", gameManager.game.artifact3);
-
+        fbGame.Add("foundMatchingArtifact", gameManager.game.foundArtifact);
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
         firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
     }

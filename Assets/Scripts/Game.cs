@@ -12,6 +12,7 @@ public class Game {
     public string artifactTrigger2;
     public string artifactTrigger3;
     public float gateLevel;
+    public bool foundArtifact = false;
     public Game()
     {
         gateLevel = 50f;

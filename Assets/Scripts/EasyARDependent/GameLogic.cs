@@ -11,6 +11,7 @@ using UnityEngine;
             public ImageTargetController symbol2;
             public GameObject artifact;
             public int comboBit;
+            public bool firstTimeFound = false;
         }
 
         public ARSession Session;
@@ -50,13 +51,31 @@ using UnityEngine;
             // check if combination has been detected
             foreach(TwoSymbolArtifactLink link in linkMap){
                 int combo = link.comboBit; // int operators are destructive
-                Debug.Log(combo & detectedTargets);
                 if((combo & detectedTargets) == link.comboBit){
-                    isArtifact = true;
                     ActivateArtifact(link, link.symbol1.transform);
+                    if(!link.firstTimeFound){
+/*                        switch(GameManager.instance.game.gameLevel){
+                            case 1:
+                                GameManager.instance.game.artifact1 = link.artifactName;
+                                break;
+                            case 2:
+                                GameManager.instance.game.artifact2 = link.artifactName;
+                                break;
+                            case 3:
+                                GameManager.instance.game.artifact3 = link.artifactName;
+                                break;
+                        }
+                        GameManager.instance.game.gameLevel++;
+*/
+                        // write the role of the player sane or insane who found the artifact to the artifact database
+
+                        // write the name of the role that found the artifact to the database and update the gate level
+                        link.firstTimeFound = true;
+                        GameManager.instance.UpdateGateLevel(GameManager.instance.player.role);
+                        DataManager.instance.WriteGameDataToFirebase();
+                    }
                 }
                 else{
-                    isArtifact = false;
                     link.artifact.transform.SetParent(null);
                 }
             }

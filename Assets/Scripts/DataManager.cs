@@ -28,11 +28,10 @@ public class DataManager : MonoBehaviour
         gameManager = GameManager.instance;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
+     void OnDestroy(){
+        StopListening();
     }
+
 
     void GetFailHandler(Firebase sender, FirebaseError err)
     {
@@ -45,6 +44,10 @@ public class DataManager : MonoBehaviour
 
 //        fbGame.Add("code", game.code);
         fbGame.Add("playerPosition", gameManager.game.playerPosition);
+        fbGame.Add("gateLevel", gameManager.game.gateLevel);
+        fbGame.Add("artifact1", gameManager.game.artifact1);
+        fbGame.Add("artifact2", gameManager.game.artifact2);
+        fbGame.Add("artifact3", gameManager.game.artifact3);
 
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
         firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
@@ -61,21 +64,16 @@ public class DataManager : MonoBehaviour
 
     }
 
-
+    
     public void StartListening()
     {
-        observer = new FirebaseObserver(firebase.Child(gameManager.game.code + "/playerPosition"), 1f);
+        observer = new FirebaseObserver(firebase.Child(gameManager.game.code), 1f);
         observer.OnChange += (Firebase sender, DataSnapshot snapshot) =>
         {
             Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
-
-            float x = System.Convert.ToSingle(dict["x"]);
-            float y = System.Convert.ToSingle(dict["y"]);
-            float z = System.Convert.ToSingle(dict["z"]);
-
-            gameManager.game.playerPosition = new Vector3(x, y, z);
-
-            gameManager.MovePlayer();
+        /*    System.Enum.TryParse<Player.Role>((string)dict["artifact1"],false,out Player.Role role);*/
+            GameManager.instance.game.gateLevel = System.Convert.ToSingle(dict["gateLevel"]);
+            GameManager.instance.player.SetArtifactToFind((string)dict["artifact1"]);
 
             //Debug.Log("playerposx: " + game.playerPosition);
 
@@ -96,5 +94,4 @@ public class DataManager : MonoBehaviour
     {
         observer.Stop();
     }
-
 }

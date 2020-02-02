@@ -4,15 +4,27 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    public enum Role {Sane, Insane}
+    public Role role; // sane or insane
+    public string artifactToFind;
+
+    public void SetRole(string n){
+        Player.Role _role;
+        switch(n){
+            case "Sane":
+            _role = Player.Role.Sane;
+            break;
+            case "Insane":
+            _role = Player.Role.Insane;
+            break;
+            default:
+            _role = Player.Role.Insane;
+            break;
+        }
+        role = _role;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    public void SetArtifactToFind(string artifact){
+        artifactToFind = artifact;
     }
 }

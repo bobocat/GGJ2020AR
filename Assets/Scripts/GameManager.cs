@@ -7,12 +7,13 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
-    public string gameID;
+    public string gameID = "Cthulhu";
+    public float gateIncrease = 5f;
     public Game game;
 
     DataManager dataManager;
-    public Player playerPrefab;
-    Player player;
+    public GameObject playerPrefab;
+    public Player player;
 
     private void Awake()
     {
@@ -49,14 +50,26 @@ public class GameManager : MonoBehaviour
         dataManager.WriteGameDataToFirebase();
 
         // instantiate the player
-        player = Instantiate(playerPrefab);
-        player.transform.position = game.playerPosition;
+    //    GameObject playerObj = GameObject.Instantiate(playerPrefab, game.playerPosition, Quaternion.identity);
+    //    player = playerObj.GetComponent<Player>();
     }
 
 
     public void MovePlayer()
     {
         player.transform.position = game.playerPosition;
+    }
+
+    public void UpdateGateLevel(Player.Role role)
+    {
+        switch(role){
+            case Player.Role.Insane:
+                game.gateLevel += gateIncrease;
+                break;
+            case Player.Role.Sane:
+                game.gateLevel -= gateIncrease;
+                break;
+        }
     }
 
 }

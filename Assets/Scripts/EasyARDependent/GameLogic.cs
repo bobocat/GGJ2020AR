@@ -7,34 +7,59 @@ using UnityEngine;
     {
         [System.Serializable]
         public class TwoSymbolArtifactLink{
-            public string symbol1;
-            public string symbol2;
+            public ImageTargetController symbol1;
+            public ImageTargetController symbol2;
             public GameObject artifact;
+            public int comboBit;
         }
 
         public ARSession Session;
         public TwoSymbolArtifactLink[] linkMap;
-        private List<string> currentTargets = new List<string>();
-        private Dictionary<ImageTargetController, List<TwoSymbolArtifactLink>> controllerMap = new Dictionary<ImageTargetController, List<TwoSymbolArtifactLink>>();
+        public float maxDistance = 3f; // distance between the two symbols
         private Dictionary<ImageTargetController, bool> imageTargetControllers = new Dictionary<ImageTargetController, bool>();
+        private Dictionary<ImageTargetController, int> controllerMap = new Dictionary<ImageTargetController, int>(); // controller map to bit
         private ImageTrackerFrameFilter imageTracker;
         private VideoCameraDevice cameraDevice;
+
+        [SerializeField] int detectedTargets = 0;
+        bool isArtifact = false;
 
         private void Awake()
         {
             imageTracker = Session.GetComponentInChildren<ImageTrackerFrameFilter>();
             cameraDevice = Session.GetComponentInChildren<VideoCameraDevice>();
 
+            int power = 1;
             // targets from scene
             foreach(ImageTargetController control in Resources.FindObjectsOfTypeAll(typeof(ImageTargetController))){
                 imageTargetControllers.Add(control, false);
                 AddTargetControllerEvents(control);
+                controllerMap.Add(control, (int)Math.Pow(2,power)); // set controller to a bit number (power of 2)
+                power++;
+            }
+            // calculate combination bits for each combo of symbols that trigger an artifact
+            foreach(TwoSymbolArtifactLink link in linkMap){
+                int bit1 = controllerMap[link.symbol1];
+                int bit2 = controllerMap[link.symbol2];
+                link.comboBit = bit1 | bit2;
             }
         }
 
         private void Update()
         {
-            
+            // check if combination has been detected
+            foreach(TwoSymbolArtifactLink link in linkMap){
+                int combo = link.comboBit; // int operators are destructive
+                Debug.Log(combo & detectedTargets);
+                if((combo & detectedTargets) == link.comboBit){
+                    isArtifact = true;
+                    ActivateArtifact(link, link.symbol1.transform);
+                }
+                else{
+                    isArtifact = false;
+                    link.artifact.transform.SetParent(null);
+                }
+            }
         }
 
         public void Tracking(bool on)
@@ -63,52 +88,29 @@ using UnityEngine;
             cameraDevice.enabled = enable;
         }
 
+        void ActivateArtifact(TwoSymbolArtifactLink link, Transform parent){
+            float distance = (link.symbol1.transform.position - link.symbol2.transform.position).magnitude;
+            Debug.Log($"distance {distance}");
+            if(distance < maxDistance){
+                link.artifact.SetActive(true);
+                link.artifact.transform.SetParent(parent);
+            }
+            else{
+                link.artifact.SetActive(false);
+                link.artifact.transform.SetParent(null);
+            }
+
+        }
         void TargetFound(ImageTargetController controller){
             string name = controller.Target.name();
             Debug.LogFormat("Found target {{id = {0}, name = {1}}}", controller.Target.runtimeID(), name);
-            currentTargets.Add(name);
-            foreach(TwoSymbolArtifactLink link in linkMap){
-                if(name == link.symbol1){
-                    if(currentTargets.Contains(link.symbol2)){
-                        link.artifact.SetActive(true);
-                        link.artifact.transform.SetParent(controller.transform);
-                    }
-                }
-                else if(name == link.symbol2){
-                    if(currentTargets.Contains(link.symbol1)){
-                        link.artifact.SetActive(true);
-                        link.artifact.transform.SetParent(controller.transform);
-
-                    }
-                }
-                else{
-                    Debug.Log("not a valid combination");
-                }
-            }
-
+            detectedTargets |= controllerMap[controller]; //add controller to list of detected controllers
         }
 
         void TargetLost(ImageTargetController controller){
             string name = controller.Target.name();
              Debug.LogFormat("Lost target {{id = {0}, name = {1}}}", controller.Target.runtimeID(), controller.Target.name());
-             currentTargets.Remove(name);
-            foreach(TwoSymbolArtifactLink link in linkMap){
-                if(name == link.symbol1){
-                    if(currentTargets.Contains(link.symbol2)){
-                        link.artifact.SetActive(false);
-                        link.artifact.transform.SetParent(null);
-                    }
-                }
-                else if(name == link.symbol2){
-                    if(currentTargets.Contains(link.symbol1)){
-                        link.artifact.SetActive(false);
-                        link.artifact.transform.SetParent(null);
-                    }
-                }
-                else{
-                    Debug.Log("not a valid combination");
-                }
-            }
+             detectedTargets = detectedTargets & ~ controllerMap[controller]; //remove controller from list of detected controllers
         }
         private void AddTargetControllerEvents(ImageTargetController controller)
         {

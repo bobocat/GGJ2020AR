@@ -79,7 +79,9 @@ public class DataManager : MonoBehaviour
             Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
         /*    System.Enum.TryParse<Player.Role>((string)dict["artifact1"],false,out Player.Role role);*/
             GameManager.instance.game.gateLevel = System.Convert.ToSingle(dict["gateLevel"]);
-            GameManager.instance.player.SetArtifactToFind((string)dict["artifact1"]);
+            if(((string)dict["artifact1"]).ToLower() == "found"){
+                GameManager.instance.player.SetArtifactToFind();
+            }
             bool isEnd = System.Convert.ToBoolean(dict["foundMatchingArtifact"]);
             if(isEnd){
                 GameManager.instance.EndGame();

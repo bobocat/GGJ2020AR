@@ -6,8 +6,9 @@ public class Player : MonoBehaviour
 {
     public enum Role {Sane, Insane}
     public Role role; // sane or insane
-    public string artifactToFind;
+    public GameObject artifactToFind;
     public bool won = false;
+    public GameObject artifactToFind_go;
 
     public void SetRole(string n){
         Player.Role _role;
@@ -25,7 +26,21 @@ public class Player : MonoBehaviour
         role = _role;
     }
 
-    public void SetArtifactToFind(string artifact){
-        artifactToFind = artifact;
+    public void SetArtifactToFind(){
+        switch(role){
+            case Player.Role.Insane:
+            artifactToFind = GameLogic.instance.insaneArtifact;
+            break;
+            case Player.Role.Sane:
+            artifactToFind = GameLogic.instance.saneArtifact;
+            break;
+            default:
+            artifactToFind = GameLogic.instance.saneArtifact;
+            break;
+        }
+                artifactToFind_go = Instantiate(artifactToFind, GameLogic.instance.worldRoot.transform.position, Quaternion.identity);
+                artifactToFind_go.transform.SetParent(GameLogic.instance.worldRoot.transform);
+                artifactToFind_go.SetActive(true);
+
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class GameLogic : MonoBehaviour
 {
+    public static GameLogic instance;
+
     [System.Serializable]
     public class TwoSymbolArtifactLink
     {
@@ -18,15 +20,19 @@ public class GameLogic : MonoBehaviour
     public ARSession Session;
     public TwoSymbolArtifactLink[] linkMap;
     public float maxDistance = 3f; // distance between the two symbols
+    [SerializeField] int detectedTargets = 0;
+    public GameObject worldRoot;
+    [Header("Artifacts to find hardcode")]
+    public GameObject saneArtifact;
+    public GameObject insaneArtifact;
     private Dictionary<ImageTargetController, bool> imageTargetControllers = new Dictionary<ImageTargetController, bool>();
     private Dictionary<ImageTargetController, int> controllerMap = new Dictionary<ImageTargetController, int>(); // controller map to bit
     private ImageTrackerFrameFilter imageTracker;
     private VideoCameraDevice cameraDevice;
 
-    [SerializeField] int detectedTargets = 0;
-
     private void Awake()
     {
+        instance = this;
         imageTracker = Session.GetComponentInChildren<ImageTrackerFrameFilter>();
         cameraDevice = Session.GetComponentInChildren<VideoCameraDevice>();
 
@@ -83,7 +89,7 @@ public class GameLogic : MonoBehaviour
                         GameManager.instance.UpdateGateLevel(GameManager.instance.player.role);
                         DataManager.instance.WriteGameDataToFirebase();
                     }
-                    if (link.artifact.name == GameManager.instance.player.artifactToFind)
+                    if (link.artifact == GameManager.instance.player.artifactToFind)
                     {
                         GameManager.instance.game.foundArtifact = true;
                         GameManager.instance.player.won = true;
@@ -128,7 +134,6 @@ public class GameLogic : MonoBehaviour
     void ActivateArtifact(TwoSymbolArtifactLink link, Transform parent)
     {
         float distance = (link.symbol1.transform.position - link.symbol2.transform.position).magnitude;
-        Debug.Log($"distance {distance}");
         if (distance < maxDistance)
         {
             link.artifact.SetActive(true);

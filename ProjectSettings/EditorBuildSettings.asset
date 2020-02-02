@@ -5,9 +5,15 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/arbase.unity
     guid: f6c83bc376175104e9fec285465f3be1
+  - enabled: 1
+    path: Assets/Scenes/easyartest.unity
+    guid: 1a2769844741ad743bba4b888914e793
+  - enabled: 0
+    path: Assets/Samples/Scenes/ObjectSensing/ImageTracking_Targets.unity
+    guid: c5633c5dd1eaddf4ab5995534d042779
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 407a58974a7e96349903480f53c7be87,
       type: 2}

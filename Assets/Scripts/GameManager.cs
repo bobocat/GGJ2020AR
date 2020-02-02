@@ -18,8 +18,12 @@ public class GameManager : MonoBehaviour
     //public TextMeshProUGUI text;
     public GameObject win;
     public GameObject lose;
-    public enum State {ChooseRole, Playing, End}
+    [System.Serializable]
+    public enum State {ChooseRole, FirstPhase, SecondPhase, End}
     public State gamePhase = State.ChooseRole;
+
+    public Material monsterMat;
+    float totalGateLevel = 100;
 
     private void Awake()
     {
@@ -54,8 +58,7 @@ public class GameManager : MonoBehaviour
         else game.code = id;
 
         dataManager.WriteInitialGameDataToFirebase();
-        gamePhase = State.Playing;
-
+        gamePhase = State.FirstPhase;
         // instantiate the player
     //    GameObject playerObj = GameObject.Instantiate(playerPrefab, game.playerPosition, Quaternion.identity);
     //    player = playerObj.GetComponent<Player>();
@@ -66,6 +69,14 @@ public class GameManager : MonoBehaviour
         endGame.SetActive(true);
         if(GameManager.instance.player.won){
             win.SetActive(true);
+
+            // bring Cthulhu to full opacity! Or seal him away!
+            if(GameManager.instance.player.role == Player.Role.Insane){
+                UpdateGateLevel(100);
+            }
+            else{
+                UpdateGateLevel(0);
+            }
         }
         else{
             lose.SetActive(true);
@@ -78,16 +89,22 @@ public class GameManager : MonoBehaviour
         player.transform.position = game.playerPosition;
     }
 
-    public void UpdateGateLevel(Player.Role role)
+    public void IncrementGateLevel(Player.Role role)
     {
         switch(role){
             case Player.Role.Insane:
-                game.gateLevel += gateIncrease;
+                UpdateGateLevel(game.gateLevel + gateIncrease);
                 break;
             case Player.Role.Sane:
-                game.gateLevel -= gateIncrease;
+                UpdateGateLevel(game.gateLevel - gateIncrease);
                 break;
         }
+    }
+
+    public void UpdateGateLevel(float value){
+        game.gateLevel = value;
+        float frac = game.gateLevel / totalGateLevel;
+        monsterMat.color = new Color(monsterMat.color.r, monsterMat.color.b, monsterMat.color.g, (int)Mathf.Lerp(0, 255, frac));
     }
 
 }

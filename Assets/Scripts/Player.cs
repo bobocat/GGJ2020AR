@@ -30,16 +30,19 @@ public class Player : MonoBehaviour
         switch(role){
             case Player.Role.Insane:
             artifactToFind = GameLogic.instance.insaneArtifact;
+            artifactToFind_go = GameLogic.instance.insaneArtifactImage;
             break;
             case Player.Role.Sane:
             artifactToFind = GameLogic.instance.saneArtifact;
+            artifactToFind_go = GameLogic.instance.saneArtifactImage;
             break;
             default:
             artifactToFind = GameLogic.instance.saneArtifact;
+            artifactToFind_go = GameLogic.instance.saneArtifactImage;
             break;
         }
-                artifactToFind_go = Instantiate(artifactToFind, GameLogic.instance.worldRoot.transform.position, Quaternion.identity);
-                artifactToFind_go.transform.SetParent(GameLogic.instance.worldRoot.transform);
+        /*        artifactToFind_go = Instantiate(artifactToFind, GameLogic.instance.worldRoot.transform.position, Quaternion.identity);
+                artifactToFind_go.transform.SetParent(GameLogic.instance.worldRoot.transform);*/
                 artifactToFind_go.SetActive(true);
 
     }

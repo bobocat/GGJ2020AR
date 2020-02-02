@@ -24,7 +24,9 @@ public class GameLogic : MonoBehaviour
     public GameObject worldRoot;
     [Header("Artifacts to find hardcode")]
     public GameObject saneArtifact;
+    public GameObject saneArtifactImage;
     public GameObject insaneArtifact;
+    public GameObject insaneArtifactImage;
     private Dictionary<ImageTargetController, bool> imageTargetControllers = new Dictionary<ImageTargetController, bool>();
     private Dictionary<ImageTargetController, int> controllerMap = new Dictionary<ImageTargetController, int>(); // controller map to bit
     private ImageTrackerFrameFilter imageTracker;
@@ -56,8 +58,21 @@ public class GameLogic : MonoBehaviour
 
     private void Update()
     {
-        if (GameManager.instance.gamePhase == GameManager.State.Playing)
+            // check gate level for end game
+        if(GameManager.instance.gamePhase == GameManager.State.FirstPhase){
+            if(GameManager.instance.game.gateLevel <=0){
+                if(GameManager.instance.player.role == Player.Role.Sane){
+                    GameManager.instance.player.won = true;
+                }
+                else{
+                    GameManager.instance.player.won = false;
+                }
+                GameManager.instance.EndGame();
+            }
+        }
+        if (GameManager.instance.gamePhase != GameManager.State.End)
         {
+            // find artifact
             // check if combination has been detected
             foreach (TwoSymbolArtifactLink link in linkMap)
             {
@@ -67,7 +82,7 @@ public class GameLogic : MonoBehaviour
                     ActivateArtifact(link, link.symbol1.transform);
 
                     // mainly for first phase of game: can only raise and lower gate levels once
-                    if (!link.firstTimeFound)
+                    if (!link.firstTimeFound && GameManager.instance.gamePhase == GameManager.State.FirstPhase)
                     {
                         /*                        switch(GameManager.instance.game.gameLevel){
                                                     case 1:
@@ -86,10 +101,15 @@ public class GameLogic : MonoBehaviour
 
                         // write the name of the role that found the artifact to the database and update the gate level
                         link.firstTimeFound = true;
-                        GameManager.instance.UpdateGateLevel(GameManager.instance.player.role);
-                        DataManager.instance.WriteGameDataToFirebase();
+                        if(GameManager.instance.player.role == Player.Role.Sane){
+                            DataManager.instance.WriteValueToFirebase("saneMatch", true);
+                        }
+                        else{
+                            DataManager.instance.WriteValueToFirebase("insaneMatch", true);
+                        }
+                        DataManager.instance.AskForValue(); // get gate level from database and once that's done, update gate level
                     }
-                    if (link.artifact == GameManager.instance.player.artifactToFind)
+                    if (link.artifact == GameManager.instance.player.artifactToFind&& GameManager.instance.gamePhase == GameManager.State.SecondPhase)
                     {
                         GameManager.instance.game.foundArtifact = true;
                         GameManager.instance.player.won = true;
@@ -99,6 +119,7 @@ public class GameLogic : MonoBehaviour
                 }
                 else
                 {
+                    link.artifact.SetActive(false);
                     link.artifact.transform.SetParent(null);
                 }
             }

@@ -63,6 +63,18 @@ public class DataManager : MonoBehaviour
 
     }
 
+        public void WriteValueToFirebase(string key, object value){
+                Dictionary<string, object> fbGame = new Dictionary<string, object>();
+
+//        fbGame.Add("code", game.code);
+        fbGame.Add(key,value);
+
+        string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
+        firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
+
+    }
+
+
     public void GetPlayerPositionFromFB()
     {
         firebase.Child(gameManager.game.code + "/playerPosition", true).GetValue();
@@ -75,11 +87,14 @@ public class DataManager : MonoBehaviour
     }
 
     void OnChange(Firebase sender, DataSnapshot snapshot) {
-        
+        if(GameManager.instance.gamePhase != GameManager.State.End){
             Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
         /*    System.Enum.TryParse<Player.Role>((string)dict["artifact1"],false,out Player.Role role);*/
-            GameManager.instance.game.gateLevel = System.Convert.ToSingle(dict["gateLevel"]);
+           GameManager.instance.UpdateGateLevel( System.Convert.ToSingle(dict["gateLevel"]));
+
+            // if it is time to find a matching artifact, set it and enter second phase
             if(((string)dict["artifact1"]).ToLower() == "found"){
+                GameManager.instance.gamePhase = GameManager.State.SecondPhase;
                 GameManager.instance.player.SetArtifactToFind();
             }
             bool isEnd = System.Convert.ToBoolean(dict["foundMatchingArtifact"]);
@@ -87,6 +102,7 @@ public class DataManager : MonoBehaviour
                 GameManager.instance.EndGame();
                 observer.OnChange -= OnChange;
             }
+        }
         }
     public void StartListening()
     {
@@ -111,4 +127,18 @@ public class DataManager : MonoBehaviour
     {
         observer.Stop();
     }
+
+    public void AskForValue(){
+        firebase.Child(gameManager.game.code, true).GetValue();
+        firebase.OnGetSuccess += UpdateGateLevel;
+    }
+
+    void UpdateGateLevel(Firebase sender, DataSnapshot snapshot){
+            firebase.OnGetSuccess -= UpdateGateLevel;
+            Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
+            GameManager.instance.UpdateGateLevel(System.Convert.ToSingle(dict["gateLevel"]));
+            GameManager.instance.IncrementGateLevel(GameManager.instance.player.role);
+            DataManager.instance.WriteGameDataToFirebase();
+    }
+
 }

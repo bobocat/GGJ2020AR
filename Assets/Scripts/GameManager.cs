@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using TMPro;
 public class GameManager : MonoBehaviour
 {
 
@@ -14,6 +14,12 @@ public class GameManager : MonoBehaviour
     DataManager dataManager;
     public GameObject playerPrefab;
     public Player player;
+    public GameObject endGame;
+    //public TextMeshProUGUI text;
+    public GameObject win;
+    public GameObject lose;
+    public enum State {ChooseRole, Playing, End}
+    public State gamePhase = State.ChooseRole;
 
     private void Awake()
     {
@@ -47,13 +53,25 @@ public class GameManager : MonoBehaviour
         }
         else game.code = id;
 
-        dataManager.WriteGameDataToFirebase();
+        dataManager.WriteInitialGameDataToFirebase();
+        gamePhase = State.Playing;
 
         // instantiate the player
     //    GameObject playerObj = GameObject.Instantiate(playerPrefab, game.playerPosition, Quaternion.identity);
     //    player = playerObj.GetComponent<Player>();
     }
 
+    public void EndGame(){
+        gamePhase = State.End;
+        endGame.SetActive(true);
+        if(GameManager.instance.player.won){
+            win.SetActive(true);
+        }
+        else{
+            lose.SetActive(true);
+        }
+        DataManager.instance.StopListening();
+    }
 
     public void MovePlayer()
     {

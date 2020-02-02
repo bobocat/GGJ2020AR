@@ -50,6 +50,19 @@ public class DataManager : MonoBehaviour
         firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
     }
 
+    public void WriteInitialGameDataToFirebase(){
+                Dictionary<string, object> fbGame = new Dictionary<string, object>();
+
+//        fbGame.Add("code", game.code);
+        fbGame.Add("playerPosition", gameManager.game.playerPosition);
+        fbGame.Add("gateLevel", gameManager.game.gateLevel);
+        fbGame.Add("foundMatchingArtifact", false);
+        fbGame.Add("artifact1", "");
+        string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
+        firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
+
+    }
+
     public void GetPlayerPositionFromFB()
     {
         firebase.Child(gameManager.game.code + "/playerPosition", true).GetValue();
@@ -61,16 +74,22 @@ public class DataManager : MonoBehaviour
 
     }
 
-    
-    public void StartListening()
-    {
-        observer = new FirebaseObserver(firebase.Child(gameManager.game.code), 1f);
-        observer.OnChange += (Firebase sender, DataSnapshot snapshot) =>
-        {
+    void OnChange(Firebase sender, DataSnapshot snapshot) {
+        
             Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
         /*    System.Enum.TryParse<Player.Role>((string)dict["artifact1"],false,out Player.Role role);*/
             GameManager.instance.game.gateLevel = System.Convert.ToSingle(dict["gateLevel"]);
             GameManager.instance.player.SetArtifactToFind((string)dict["artifact1"]);
+            bool isEnd = System.Convert.ToBoolean(dict["foundMatchingArtifact"]);
+            if(isEnd){
+                GameManager.instance.EndGame();
+                observer.OnChange -= OnChange;
+            }
+        }
+    public void StartListening()
+    {
+        observer = new FirebaseObserver(firebase.Child(gameManager.game.code), 1f);
+        observer.OnChange += OnChange;
 
             //Debug.Log("playerposx: " + game.playerPosition);
 
@@ -82,7 +101,6 @@ public class DataManager : MonoBehaviour
                             observer.Stop();
                         }
             */
-        };
 
         observer.Start();
     }

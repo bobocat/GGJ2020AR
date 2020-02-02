@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
     public enum Role {Sane, Insane}
     public Role role; // sane or insane
     public string artifactToFind;
+    public bool won = false;
 
     public void SetRole(string n){
         Player.Role _role;

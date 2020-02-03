@@ -43,7 +43,6 @@ public class DataManager : MonoBehaviour
         Dictionary<string, object> fbGame = new Dictionary<string, object>();
 
 //        fbGame.Add("code", game.code);
-        fbGame.Add("playerPosition", gameManager.game.playerPosition);
    //     fbGame.Add("gateLevel", gameManager.game.gateLevel);
         fbGame.Add("foundMatchingArtifact", gameManager.game.foundArtifact);
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
@@ -54,10 +53,11 @@ public class DataManager : MonoBehaviour
                 Dictionary<string, object> fbGame = new Dictionary<string, object>();
 
 //        fbGame.Add("code", game.code);
-        fbGame.Add("playerPosition", gameManager.game.playerPosition);
     //    fbGame.Add("gateLevel", gameManager.game.gateLevel);
         fbGame.Add("foundMatchingArtifact", false);
         fbGame.Add("artifact1", "");
+        fbGame.Add("saneMatch", 0);
+        fbGame.Add("insaneMatch", 0);
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
         firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
 

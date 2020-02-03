@@ -31,6 +31,7 @@ public class GameLogic : MonoBehaviour
     private Dictionary<ImageTargetController, int> controllerMap = new Dictionary<ImageTargetController, int>(); // controller map to bit
     private ImageTrackerFrameFilter imageTracker;
     private VideoCameraDevice cameraDevice;
+    private int matchIndex = 1;
 
     private void Awake()
     {
@@ -102,12 +103,15 @@ public class GameLogic : MonoBehaviour
                         // write the name of the role that found the artifact to the database and update the gate level
                         link.firstTimeFound = true;
                         if(GameManager.instance.player.role == Player.Role.Sane){
-                            DataManager.instance.WriteValueToFirebase("saneMatch", true);
+                            DataManager.instance.WriteValueToFirebase("saneMatch", matchIndex++);
                         }
                         else{
-                            DataManager.instance.WriteValueToFirebase("insaneMatch", true);
+                            DataManager.instance.WriteValueToFirebase("insaneMatch", matchIndex++);
                         }
-                        DataManager.instance.AskForValue(); // get gate level from database and once that's done, update gate level
+                        //DataManager.instance.AskForValue(); // get gate level from database and once that's done, update gate level
+                        //        GameManager.instance.IncrementGateLevel(GameManager.instance.player.role);
+           // DataManager.instance.WriteGameDataToFirebase();
+
                     }
                     if (link.artifact == GameManager.instance.player.artifactToFind&& GameManager.instance.gamePhase == GameManager.State.SecondPhase)
                     {

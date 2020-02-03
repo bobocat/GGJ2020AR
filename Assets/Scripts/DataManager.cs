@@ -44,7 +44,7 @@ public class DataManager : MonoBehaviour
 
 //        fbGame.Add("code", game.code);
         fbGame.Add("playerPosition", gameManager.game.playerPosition);
-        fbGame.Add("gateLevel", gameManager.game.gateLevel);
+   //     fbGame.Add("gateLevel", gameManager.game.gateLevel);
         fbGame.Add("foundMatchingArtifact", gameManager.game.foundArtifact);
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
         firebaseQueue.AddQueueUpdate(firebase.Child(gameManager.game.code, true), json);
@@ -55,7 +55,7 @@ public class DataManager : MonoBehaviour
 
 //        fbGame.Add("code", game.code);
         fbGame.Add("playerPosition", gameManager.game.playerPosition);
-        fbGame.Add("gateLevel", gameManager.game.gateLevel);
+    //    fbGame.Add("gateLevel", gameManager.game.gateLevel);
         fbGame.Add("foundMatchingArtifact", false);
         fbGame.Add("artifact1", "");
         string json = Newtonsoft.Json.JsonConvert.SerializeObject(fbGame);
@@ -137,7 +137,7 @@ public class DataManager : MonoBehaviour
             firebase.OnGetSuccess -= UpdateGateLevel;
             Dictionary<string, object> dict = snapshot.Value<Dictionary<string, object>>();
             GameManager.instance.UpdateGateLevel(System.Convert.ToSingle(dict["gateLevel"]));
-            GameManager.instance.IncrementGateLevel(GameManager.instance.player.role);
+        //    GameManager.instance.IncrementGateLevel(GameManager.instance.player.role);
             DataManager.instance.WriteGameDataToFirebase();
     }
 

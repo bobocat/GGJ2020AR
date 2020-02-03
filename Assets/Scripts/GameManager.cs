@@ -89,7 +89,7 @@ public class GameManager : MonoBehaviour
         player.transform.position = game.playerPosition;
     }
 
-    public void IncrementGateLevel(Player.Role role)
+  /*  public void IncrementGateLevel(Player.Role role)
     {
         switch(role){
             case Player.Role.Insane:
@@ -99,12 +99,13 @@ public class GameManager : MonoBehaviour
                 UpdateGateLevel(game.gateLevel - gateIncrease);
                 break;
         }
-    }
+    }*/
 
     public void UpdateGateLevel(float value){
         game.gateLevel = value;
         float frac = game.gateLevel / totalGateLevel;
-        monsterMat.color = new Color(monsterMat.color.r, monsterMat.color.b, monsterMat.color.g, (int)Mathf.Lerp(0, 255, frac));
+        Debug.Log(frac);
+        monsterMat.color = new Color(monsterMat.color.r, monsterMat.color.b, monsterMat.color.g, frac);
     }
 
 }
